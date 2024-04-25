@@ -38,8 +38,9 @@ async function updateContact(id, body) {
     const index = data.findIndex(contact => contact.id === id);
     if (index !== -1) {
         data[index] = { ...data[index], ...body };
+        fs.writeFile(contactsPath, JSON.stringify(data));
+        return data[index];
     }
-    return data;
 }
 
 
