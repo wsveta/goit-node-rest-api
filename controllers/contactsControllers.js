@@ -1,30 +1,18 @@
 import contactsService from "../services/contactsServices.js";
 import { createContactSchema, updateContactSchema } from "../schemas/contactsSchemas.js";
 
-export const getAllContacts = async (req, res) => {
-    console.log(req)
-    res.json({
-        status: 'success',
-        code: 200,
-        data: { contacts: await contactsService.listContacts() }
-    })
+export const getAllContacts = async (_, res) => {
+    const data = await contactsService.listContacts()
+    res.send(data)
 };
 
 export const getOneContact = async (req, res) => {
     const { id } = req.params;
     const data = await contactsService.getContactById(id);
     if (data) {
-        res.json({
-            status: 'success',
-            code: 200,
-            data: data,
-        })
-
+        res.status(200).send(data)
     } else {
-        res.json({
-            code: 404,
-            message: "Nof found"
-        })
+        res.status(404).send({ message: "Not found" })
     }
 };
 
@@ -32,32 +20,20 @@ export const deleteContact = async (req, res) => {
     const { id } = req.params;
     const data = await contactsService.removeContact(id);
     if (data) {
-        res.json({
-            status: 'success',
-            code: 200,
-            data,
-        })
-
+        res.status(200).send(data)
     } else {
-        res.json({
-            code: 404,
-            message: "Nof found"
-        })
+        res.status(404).send({ message: "Not found" })
     }
 };
 
 export const createContact = async (req, res) => {
     const { name, email, phone } = req.body;
     try {
-        createContactSchema.validateAsync({ name, email, phone });
+        await createContactSchema.validateAsync({ name, email, phone });
         const data = await contactsService.addContact(name, email, phone);
-        res.json({
-            status: 201,
-            data,
-        })
+        res.status(201).send(data)
     } catch (error) {
-        res.json({
-            code: 400,
+        res.status(400).send({
             message: error.message
         })
     }
@@ -65,17 +41,17 @@ export const createContact = async (req, res) => {
 
 export const updateContact = async (req, res) => {
     const { id } = req.params;
-    const { name, email, phone } = req.body;
+    const body = req.body;
     try {
-        const contact = await updateContactSchema.validateAsync({ name, email, phone });
-        const data = await contactsService.updateContact(id, contact);
-        res.json({
-            status: 200,
-            data
-        })
+        if (Object.keys(body).length === 0) {
+            res.status(400).send({ message: "Body must have at least one field" })
+        } else {
+            await updateContactSchema.validateAsync(body);
+            const data = await contactsService.updateContact(id, body);
+            res.status(200).send(data)
+        }
     } catch (error) {
-        res.json({
-            code: 400,
+        res.status(400).send({
             message: error.message
         })
     }
