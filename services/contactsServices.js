@@ -40,6 +40,8 @@ async function updateContact(id, body) {
         data[index] = { ...data[index], ...body };
         fs.writeFile(contactsPath, JSON.stringify(data));
         return data[index];
+    } else {
+        return index;
     }
 }
 

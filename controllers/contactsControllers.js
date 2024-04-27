@@ -48,7 +48,11 @@ export const updateContact = async (req, res) => {
         } else {
             await updateContactSchema.validateAsync(body);
             const data = await contactsService.updateContact(id, body);
-            res.status(200).send(data)
+            if (data === -1) {
+                res.status(404).send({ message: "Not found" });
+            } else {
+                res.status(200).send(data)
+            }
         }
     } catch (error) {
         res.status(400).send({

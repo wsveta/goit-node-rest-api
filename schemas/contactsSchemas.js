@@ -13,5 +13,5 @@ export const updateContactSchema = Joi.object({
     name: Joi.string().min(3).max(30),
     email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
     phone: Joi.string().min(7)
-        .max(16).pattern(new RegExp('^[0-9(),-]+$')),
+        .max(16),
 });
