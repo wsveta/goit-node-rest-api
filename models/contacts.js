@@ -15,6 +15,6 @@ const contactsSchema = new Schema({
         type: Boolean,
         default: false,
     },
-});
+}, {versionKey: false});
 
 export default mongoose.model("Contact", contactsSchema);

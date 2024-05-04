@@ -1,4 +1,4 @@
-import { createContactSchema, updateContactSchema } from "../schemas/contactsSchemas.js";
+import { createContactSchema, updateContactSchema, updateStatusSchema } from "../schemas/contactsSchemas.js";
 import Contact from "../models/contacts.js";
 
 export const getAllContacts = async (_, res, next) => {
@@ -44,7 +44,6 @@ export const createContact = async (req, res, next) => {
         name: req.body.name,
         email: req.body.email,
         phone: req.body.phone,
-        favorite: req.body.favorite
     }
     try {
         await createContactSchema.validateAsync(contact);
@@ -64,11 +63,10 @@ export const updateContact = async (req, res, next) => {
         name: req.body.name,
         email: req.body.email,
         phone: req.body.phone,
-        favorite: req.body.favorite
     }
     try {
-        const result = await updateContactSchema.validateAsync(contact);
-        if (result === null) {
+        await updateContactSchema.validateAsync(contact);
+        if (JSON.stringify(contact) === '{}') {
             return res.status(400).send({ message: "Body must have at least one field" })
         }
         const data = await Contact.findByIdAndUpdate(id, contact, { new: true });
@@ -87,17 +85,15 @@ export const updateContact = async (req, res, next) => {
 export const updateStatusContact = async (req, res, next) => {
     const { id } = req.params;
     const contact = {
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
         favorite: req.body.favorite
     }
     try {
+        await updateStatusSchema.validateAsync(contact);
         const data = await Contact.findByIdAndUpdate(id, contact, { new: true });
-        if (data === null) {
+        if (JSON.stringify(contact) === '{}') {
             return res.status(404).send({ message: "Not found" });
         }
-        res.status(200).send("data")
+        res.status(200).send(data)
     } catch (error) {
         res.status(400).send({
             message: error.message
