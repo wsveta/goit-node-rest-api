@@ -14,6 +14,9 @@ export const getAllContacts = async (_, res, next) => {
 export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
     try {
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(404).send({ message: "Not found" });
+        }
         const data = await Contact.findById(id);
         if (data === null) {
             return res.status(404).send({ message: "Not found" });
@@ -28,6 +31,9 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
     const { id } = req.params;
     try {
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(404).send({ message: "Not found" })
+        }
         const data = await Contact.findByIdAndDelete(id);
         if (data === null) {
             return res.status(404).send({ message: "Not found" })
@@ -69,6 +75,9 @@ export const updateContact = async (req, res, next) => {
         if (JSON.stringify(contact) === '{}') {
             return res.status(400).send({ message: "Body must have at least one field" })
         }
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(404).send({ message: "Not found" });
+        }
         const data = await Contact.findByIdAndUpdate(id, contact, { new: true });
         if (data === null) {
             return res.status(404).send({ message: "Not found" });
@@ -89,8 +98,11 @@ export const updateStatusContact = async (req, res, next) => {
     }
     try {
         await updateStatusSchema.validateAsync(contact);
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(404).send({ message: "Not found" });
+        }
         const data = await Contact.findByIdAndUpdate(id, contact, { new: true });
-        if (JSON.stringify(contact) === '{}') {
+        if (data === null) {
             return res.status(404).send({ message: "Not found" });
         }
         res.status(200).send(data)
