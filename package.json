@@ -16,5 +16,10 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
-  }
+  },
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "Svit <lana@banana.com>",
+  "license": "ISC",
+  "description": ""
 }
