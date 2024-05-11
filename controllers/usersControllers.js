@@ -1,12 +1,12 @@
 import User from "../models/users.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { registerUserSchema } from "../schemas/usersSchemas.js";
+import { updateSubscriptionSchema, userSchema } from "../schemas/usersSchemas.js";
 
 export const registerUser = async (req, res, next) => {
     const { password, email } = req.body;
     try {
-        await registerUserSchema.validateAsync({ password, email });
+        await userSchema.validateAsync({ password, email });
 
         const processedPas = password.trim();
         const processedEmail = email.toLowerCase().trim();
@@ -32,7 +32,7 @@ export const loginUser = async (req, res, next) => {
     const { password, email } = req.body;
 
     try {
-        await registerUserSchema.validateAsync({ password, email });
+        await userSchema.validateAsync({ password, email });
 
         const processedPas = password.trim();
         const processedEmail = email.toLowerCase().trim();
@@ -85,6 +85,25 @@ export const getUserInfo = async (req, res, next) => {
 
     } catch (error) {
         res.send({ message: error.message });
+        next(error);
+    }
+}
+
+export const updateSubscription = async (req, res, next) => {
+    const subscription = req.body.subscription;
+    
+    await updateSubscriptionSchema.validateAsync({ subscription });
+
+    try {
+        const user = await User.findByIdAndUpdate(req.user.id, { subscription}, { new: true });
+        
+        if (user === null) {
+            return res.status(404).send({ message: "Not found" });
+        }
+
+        res.status(200).send({ email: user.email, subscription: user.subscription });
+    } catch (error) {
+        res.status(400).send({ message: error.message });
         next(error);
     }
 }

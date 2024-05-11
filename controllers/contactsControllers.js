@@ -2,9 +2,20 @@ import { createContactSchema, updateContactSchema, updateStatusSchema } from "..
 import Contact from "../models/contacts.js";
 
 export const getAllContacts = async (req, res, next) => {
+    const { favorite, page, limit } = req.query;
+    const currentPage = page || 1;
+
     try {
-        const data = await Contact.find({owner: req.user.id});
-        res.send(data);
+        if (favorite === 'true') {
+            const data = await Contact.paginate({ owner: req.user.id, favorite: 'true' }, {currentPage, limit});
+            return res.status(200).send(data);
+        }
+        if (favorite === 'false') {
+            const data = await Contact.paginate({ owner: req.user.id, favorite: 'false' }, { currentPage, limit });
+            return res.status(200).send(data);
+        }
+        const data = await Contact.paginate({ owner: req.user.id }, { currentPage, limit });
+         res.status(200).send(data);
     } catch (error) {
         res.send({ message: error.message });
         next(error);
@@ -17,7 +28,7 @@ export const getOneContact = async (req, res, next) => {
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(404).send({ message: "Not found" });
         }
-        const data = await Contact.findOne({_id: id, owner: req.user.id});
+        const data = await Contact.findOne({ _id: id, owner: req.user.id });
         if (data === null) {
             return res.status(404).send({ message: "Not found" });
         }
