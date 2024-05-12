@@ -3,19 +3,25 @@ import Contact from "../models/contacts.js";
 
 export const getAllContacts = async (req, res, next) => {
     const { favorite, page, limit } = req.query;
-    const currentPage = page || 1;
+    
+    const options = {
+        page: page || 1,
+        limit: limit || 20,
+    }
 
     try {
         if (favorite === 'true') {
-            const data = await Contact.paginate({ owner: req.user.id, favorite: 'true' }, {currentPage, limit});
-            return res.status(200).send(data);
+            const data = await Contact.paginate({ owner: req.user.id, favorite: 'true' }, options);
+            return res.status(200).send(data.docs);
         }
         if (favorite === 'false') {
-            const data = await Contact.paginate({ owner: req.user.id, favorite: 'false' }, { currentPage, limit });
-            return res.status(200).send(data);
+            const data = await Contact.paginate({ owner: req.user.id, favorite: 'false' },  options );
+            return res.status(200).send(data.docs);
         }
-        const data = await Contact.paginate({ owner: req.user.id }, { currentPage, limit });
-         res.status(200).send(data);
+
+        const data = await Contact.paginate({ owner: req.user.id}, options );
+        res.status(200).send(data.docs);
+
     } catch (error) {
         res.send({ message: error.message });
         next(error);

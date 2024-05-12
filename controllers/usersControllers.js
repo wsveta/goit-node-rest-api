@@ -21,7 +21,7 @@ export const registerUser = async (req, res, next) => {
 
         const data = await User.create({ password: passwordHash, email: processedEmail });
 
-        res.status(201).send(data);
+        res.status(201).send({email: data.email, subscription: data.subscription});
     } catch (error) {
         res.send({ message: error.message });
         next(error);
