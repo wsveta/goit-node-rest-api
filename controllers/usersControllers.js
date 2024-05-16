@@ -2,12 +2,15 @@ import User from "../models/users.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { updateSubscriptionSchema, userSchema } from "../schemas/usersSchemas.js";
+import gravatar from "gravatar";
+import Jimp from "jimp";
+import fs from "fs/promises";
+import path from "path";
 
 export const registerUser = async (req, res, next) => {
     const { password, email } = req.body;
     try {
         await userSchema.validateAsync({ password, email });
-
         const processedPas = password.trim();
         const processedEmail = email.toLowerCase().trim();
 
@@ -19,9 +22,11 @@ export const registerUser = async (req, res, next) => {
 
         const passwordHash = await bcrypt.hash(processedPas, 10);
 
-        const data = await User.create({ password: passwordHash, email: processedEmail });
+        const data = await User.create({
+            password: passwordHash, email: processedEmail, avatarURL: gravatar.url(email)
+        });
 
-        res.status(201).send({email: data.email, subscription: data.subscription});
+        res.status(201).send({ email: data.email, subscription: data.subscription });
     } catch (error) {
         res.send({ message: error.message });
         next(error);
@@ -91,12 +96,12 @@ export const getUserInfo = async (req, res, next) => {
 
 export const updateSubscription = async (req, res, next) => {
     const subscription = req.body.subscription;
-    
+
     await updateSubscriptionSchema.validateAsync({ subscription });
 
     try {
-        const user = await User.findByIdAndUpdate(req.user.id, { subscription}, { new: true });
-        
+        const user = await User.findByIdAndUpdate(req.user.id, { subscription }, { new: true });
+
         if (user === null) {
             return res.status(404).send({ message: "Not found" });
         }
@@ -105,5 +110,26 @@ export const updateSubscription = async (req, res, next) => {
     } catch (error) {
         res.status(400).send({ message: error.message });
         next(error);
+    }
+}
+
+export const updateAvatar = async (req, res, next) => {
+    try {
+        const file = await Jimp.read(req.file.path);
+        file.resize(250, 250).write(req.file.path);
+        await fs.rename(req.file.path,
+            path.resolve("public/avatars/", req.file.filename)
+        );
+
+        const user = await User.findByIdAndUpdate(req.user.id, { avatarURL: req.file.filename }, { new: true });
+
+        if (user === null) {
+            return res.status(404).send({ message: "Not found" });
+        }
+        res.status(200).send({ avatarURL: req.file.filename });
+    } catch (error) {
+        res.status(401).send({ message: error.message });
+        next(error);
+        next();
     }
 }
