@@ -21,7 +21,7 @@ export const registerUser = async (req, res, next) => {
 
         const data = await User.create({ password: passwordHash, email: processedEmail });
 
-        res.status(201).send({email: data.email, subscription: data.subscription});
+        res.status(201).send({ user: { email: data.email, subscription: data.subscription } });
     } catch (error) {
         res.send({ message: error.message });
         next(error);
@@ -91,12 +91,12 @@ export const getUserInfo = async (req, res, next) => {
 
 export const updateSubscription = async (req, res, next) => {
     const subscription = req.body.subscription;
-    
+
     await updateSubscriptionSchema.validateAsync({ subscription });
 
     try {
-        const user = await User.findByIdAndUpdate(req.user.id, { subscription}, { new: true });
-        
+        const user = await User.findByIdAndUpdate(req.user.id, { subscription }, { new: true });
+
         if (user === null) {
             return res.status(404).send({ message: "Not found" });
         }
