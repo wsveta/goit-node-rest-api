@@ -27,6 +27,8 @@ export const registerUser = async (req, res, next) => {
         });
 
         res.status(201).send({ email: data.email, subscription: data.subscription });
+        res.status(201).send({ user: { email: data.email, subscription: data.subscription } });
+
     } catch (error) {
         res.send({ message: error.message });
         next(error);
