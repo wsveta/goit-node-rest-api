@@ -51,7 +51,8 @@ export const deleteContact = async (req, res, next) => {
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(404).send({ message: "Not found" })
         }
-        const data = await Contact.findByIdAndDelete(id);
+        const data = await Contact.findOneAndDelete({ _id: id, owner: req.user.id });
+
         if (data === null) {
             return res.status(404).send({ message: "Not found" })
         }
@@ -96,7 +97,7 @@ export const updateContact = async (req, res, next) => {
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(404).send({ message: "Not found" });
         }
-        const data = await Contact.findByIdAndUpdate(id, contact, { new: true });
+        const data = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, contact, { new: true });
         if (data === null) {
             return res.status(404).send({ message: "Not found" });
         }
@@ -119,7 +120,7 @@ export const updateStatusContact = async (req, res, next) => {
         if (!id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(404).send({ message: "Not found" });
         }
-        const data = await Contact.findByIdAndUpdate(id, contact, { new: true });
+        const data = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, contact, { new: true });
         if (data === null) {
             return res.status(404).send({ message: "Not found" });
         }
