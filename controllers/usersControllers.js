@@ -116,6 +116,9 @@ export const updateSubscription = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
     try {
+        if (!req.file) {
+            return res.status(400).send({ message: "No image uploaded" });
+        }
         const file = await Jimp.read(req.file.path);
         file.resize(250, 250).write(req.file.path);
         await fs.rename(req.file.path,
@@ -127,7 +130,7 @@ export const updateAvatar = async (req, res, next) => {
         if (user === null) {
             return res.status(404).send({ message: "Not found" });
         }
-        res.status(200).send({ avatarURL: req.file.filename });
+        res.status(200).send({ avatarURL: "/avatars/" + req.file.filename });
     } catch (error) {
         res.status(401).send({ message: error.message });
         next(error);
