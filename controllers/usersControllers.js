@@ -125,7 +125,7 @@ export const updateAvatar = async (req, res, next) => {
             path.resolve("public/avatars/", req.file.filename)
         );
 
-        const user = await User.findByIdAndUpdate(req.user.id, { avatarURL: req.file.filename }, { new: true });
+        const user = await User.findByIdAndUpdate(req.user.id, { avatarURL: "/avatars/" + req.file.filename }, { new: true });
 
         if (user === null) {
             return res.status(404).send({ message: "Not found" });
